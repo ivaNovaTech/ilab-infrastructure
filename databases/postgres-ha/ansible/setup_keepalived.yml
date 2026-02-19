@@ -1,0 +1,36 @@
+---
+- name: Setup Keepalived for HAProxy VIP
+  hosts: proxy_nodes
+  become: yes
+  tasks:
+    - name: Allow binding to non-local IP (VIP support)
+      sysctl:
+        name: net.ipv4.ip_nonlocal_bind
+        value: '1'
+        state: present
+        reload: yes
+
+    - name: Configure Keepalived
+      copy:
+        dest: /etc/keepalived/keepalived.conf
+        content: |
+          vrrp_instance VI_1 {
+              state {{ 'MASTER' if inventory_hostname == 'haproxy-01' else 'BACKUP' }}
+              interface ens18
+              virtual_router_id 51
+              priority {{ 101 if inventory_hostname == 'haproxy-01' else 100 }}
+              advert_int 1
+              authentication {
+                  auth_type PASS
+                  auth_pass postgres_ha
+              }
+              virtual_ipaddress {
+                  10.10.10.200/24 dev ens18
+              }
+          }
+
+    - name: Ensure Keepalived is started and enabled
+      systemd:
+        name: keepalived
+        state: restarted
+        enabled: yes

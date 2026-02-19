@@ -1,0 +1,24 @@
+---
+- name: Leader-Aware Patroni Config Sync
+  hosts: db_nodes
+  become: yes
+  vars_files:
+    - patroni-config.yml
+
+  tasks:
+    - name: Check Patroni Status
+      uri:
+        url: "http://localhost:8008/patroni"
+        method: GET
+      register: patroni_status
+
+    - name: Apply FULL Config to DCS
+      uri:
+        url: "http://localhost:8008/config"
+        method: PATCH
+        body_format: json
+        # We wrap the cluster_settings in 'postgresql' if the vars file 
+        # doesn't already have that top-level key
+        body: { "postgresql": "{{ cluster_settings.postgresql }}" }
+        status_code: 200
+      when: patroni_status.json.role == "primary"

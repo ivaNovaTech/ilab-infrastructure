@@ -1,0 +1,45 @@
+---
+- name: Sync Dockerized HAProxy Configs
+  hosts: proxy_nodes
+  become: yes
+  tasks:
+    - name: Ensure the haproxy directory exists
+      file:
+        path: /home/jthairu/docker/haproxy-gateway
+        state: directory
+        owner: jthairu
+        group: jthairu
+
+    - name: Push unified HAProxy config to the host
+      copy:
+        dest: /home/jthairu/docker/haproxy-gateway/haproxy.yaml
+        content: |
+          global
+              daemon
+              maxconn 256
+
+          defaults
+              mode tcp
+              timeout connect 5s
+              timeout client 50s
+              timeout server 50s
+
+          listen postgres
+              bind *:5432
+              option httpchk GET /primary
+              http-check expect status 200
+              default-server inter 3s fall 3 rise 2 on-marked-down shutdown-sessions
+              server postgres-01 10.10.10.201:5432 check port 8008
+              server postgres-02 10.10.10.202:5432 check port 8008
+              server postgres-03 10.10.10.203:5432 check port 8008
+
+          listen stats
+              bind *:8080
+              mode http
+              stats enable
+              stats uri /haproxy?stats
+      register: proxy_config
+
+    - name: Restart HAProxy container to apply changes
+      shell: "docker restart haproxy-gateway"
+      when: proxy_config.changed

@@ -1,0 +1,13 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+# (Note: only ignore .tfvars if you want to keep passwords out of Git)
+
+# Ansible
+*.retry
+*.log
+
+# OS
+.DS_Store
