@@ -1,0 +1,66 @@
+---
+- name: Add WireGuard Peer and Show QR Code
+  hosts: vpn
+  become: true
+  vars:
+    peer_name: "phone-jthairu"
+    peer_ip: "10.20.10.2/32"
+    # Replace with your actual Public IP or DDNS
+    server_public_endpoint: "YOUR_PUBLIC_IP:51820"
+    server_wg_ip: "10.20.10.1"
+
+  tasks:
+    - name: Generate Peer Keys
+      ansible.builtin.shell: |
+        umask 077
+        wg genkey | tee /etc/wireguard/{{ peer_name }}_private.key | wg pubkey > /etc/wireguard/{{ peer_name }}_public.key
+      args:
+        creates: "/etc/wireguard/{{ peer_name }}_private.key"
+
+    - name: Read Keys for Config Generation
+      ansible.builtin.slurp:
+        src: "{{ item }}"
+      register: keys
+      loop:
+        - /etc/wireguard/{{ peer_name }}_private.key
+        - /etc/wireguard/{{ peer_name }}_public.key
+        - /etc/wireguard/publickey # The Server's Public Key
+
+    - name: Add Peer to Server Config
+      ansible.builtin.blockinfile:
+        path: /etc/wireguard/wg0.conf
+        marker: "# {mark} PEER: {{ peer_name }}"
+        block: |
+          [Peer]
+          PublicKey = {{ keys.results[1].content | b64decode | trim }}
+          AllowedIPs = {{ peer_ip }}
+      notify: Sync WireGuard
+
+    - name: Generate Client Config File
+      ansible.builtin.copy:
+        dest: "/etc/wireguard/{{ peer_name }}.conf"
+        content: |
+          [Interface]
+          PrivateKey = {{ keys.results[0].content | b64decode | trim }}
+          Address = {{ peer_ip }}
+          DNS = 1.1.1.1
+
+          [Peer]
+          PublicKey = {{ keys.results[2].content | b64decode | trim }}
+          Endpoint = {{ server_public_endpoint }}
+          AllowedIPs = 0.0.0.0/0
+          PersistentKeepalive = 25
+        mode: '0600'
+
+    - name: Generate QR Code for Terminal
+      ansible.builtin.shell: "qrencode -t ansiutf8 < /etc/wireguard/{{ peer_name }}.conf"
+      register: qr_code
+      changed_when: false
+
+    - name: Display QR Code
+      ansible.builtin.debug:
+        msg: "{{ qr_code.stdout_lines }}"
+
+  handlers:
+    - name: Sync WireGuard
+      ansible.builtin.shell: "wg syncconf wg0 <(wg-quick strip wg0)"

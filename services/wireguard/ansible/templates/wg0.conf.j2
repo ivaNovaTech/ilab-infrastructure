@@ -1,0 +1,10 @@
+[Interface]
+Address = {{ server_ip }}
+ListenPort = {{ vpn_port }}
+PrivateKey = {{ server_privkey.content | b64decode | trim }}
+
+# NAT and Forwarding rules
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o {{ eth_interface }} -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o {{ eth_interface }} -j MASQUERADE
+
+# Peer configurations will be managed by the add-peer playbook

@@ -1,0 +1,31 @@
+---
+- name: Deploy and Manage WireGuard
+  hosts: vpn
+  become: true
+  vars:
+    vpn_port: 51820
+    vpn_interface: wg0
+    client_network: 10.20.10.0/24
+    server_ip: 10.20.10.1/24
+    eth_interface: enp6s18
+
+  tasks:
+    # ... (Installation and Key Generation tasks as shown previously) ...
+
+    - name: Read Private Key
+      ansible.builtin.slurp:
+        src: /etc/wireguard/privatekey
+      register: server_privkey
+
+    - name: Initialize wg0.conf from template
+      ansible.builtin.template:
+        src: templates/wg0.conf.j2  # <--- Points to the templates folder
+        dest: /etc/wireguard/wg0.conf
+        mode: '0600'
+      notify: Restart WireGuard
+
+  handlers:
+    - name: Restart WireGuard
+      ansible.builtin.systemd:
+        name: "wg-quick@{{ vpn_interface }}"
+        state: restarted
