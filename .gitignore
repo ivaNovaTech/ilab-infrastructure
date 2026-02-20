@@ -1,13 +1,16 @@
-# Terraform
-.terraform/
-*.tfstate
-*.tfstate.backup
-*.tfvars
-# (Note: only ignore .tfvars if you want to keep passwords out of Git)
+# Terraform local state and plugins
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.backup
+**/.terraform.lock.hcl
+
+# Sensitive variable files (The Smoking Guns)
+**/*.tfvars
+**/*.tfvars.json
 
 # Ansible
-*.retry
-*.log
+**/ansible.log
+**/vault_pass.txt
 
-# OS
+# System Files
 .DS_Store

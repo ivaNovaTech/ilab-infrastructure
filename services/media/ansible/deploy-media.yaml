@@ -1,0 +1,49 @@
+---
+- name: Deploy Media Stack
+  hosts: media  # Target host group defined in inventory.ini
+  become: true
+
+  roles:
+    - nas_mounts  # Shared role for CIFS mounts
+
+  tasks:
+    - name: Ensure Python Docker SDK is installed
+      apt:
+        name: python3-docker
+        state: present
+        update_cache: yes
+
+    - name: Ensure Loki Docker driver is installed
+      community.docker.docker_plugin:
+        plugin_name: loki
+        alias: loki
+        state: enable
+        plugin_options:
+          allow-all-capabilities: "true"
+
+    - name: Ensure Traefik network exists
+      community.docker.docker_network:
+        name: traefik_proxy
+        state: present
+
+    - name: Create Media directory
+      file:
+        path: "{{ app_data_root }}"
+        state: directory
+        owner: "{{ admin_user }}"
+        group: "{{ admin_group }}"
+        mode: '0755'
+
+    - name: Copy Docker Compose configuration
+      template:
+        src: docker-compose.yaml.j2  # Uses templates/ directory by default
+        dest: "{{ app_data_root }}/docker-compose.yaml"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_group }}"
+        mode: '0644'
+
+    - name: Pull and Start Docker Stack
+      community.docker.docker_compose_v2:
+        project_src: "{{ app_data_root }}"
+        state: present
+        pull: always

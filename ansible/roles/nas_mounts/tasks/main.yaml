@@ -1,0 +1,32 @@
+---
+# roles/nas_mounts/tasks/main.yaml
+- name: Install CIFS utilities
+  apt:
+    name: cifs-utils
+    state: present
+
+- name: Create NAS credentials file
+  copy:
+    dest: /root/.nas-credentials
+    content: |
+      username={{ nas_user }}
+      password={{ nas_pass }}
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: Ensure mount points exist
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: '0755'
+  loop: "{{ storage_mounts }}"
+
+- name: Configure NAS mounts in fstab
+  mount:
+    path: "{{ item.path }}"
+    src: "//{{ nas_ip }}/{{ item.share }}"
+    fstype: cifs
+    opts: "credentials=/root/.nas-credentials,uid=1000,gid=1000,rw,vers=3.0,nofail"
+    state: mounted
+  loop: "{{ storage_mounts }}"
