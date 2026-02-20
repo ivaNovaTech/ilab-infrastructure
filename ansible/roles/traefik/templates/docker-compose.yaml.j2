@@ -1,0 +1,35 @@
+networks:
+  traefik_proxy:
+    external: true
+
+services:
+  traefik:
+    image: traefik:v3.6.6
+    logging: 
+      driver: loki
+      options:
+        loki-url: "http://10.10.10.90:3100/loki/api/v1/push"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - {{ traefik_config_dir }}/traefik.yml:/etc/traefik/traefik.yml:ro
+      - {{ traefik_config_dir }}/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - {{ traefik_config_dir }}/acme.json:/etc/traefik/acme.json:rw
+    environment:
+      - AWS_ACCESS_KEY_ID={{ aws_access_key }}
+      - AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+      - AWS_REGION={{ aws_region | default('us-east-1') }}
+    networks:
+      - traefik_proxy

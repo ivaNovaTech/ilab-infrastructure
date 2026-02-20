@@ -1,0 +1,26 @@
+vrrp_instance VI_1 {
+    state {{ 'MASTER' if inventory_hostname == 'traefik-01' else 'BACKUP' }}
+    interface ens18
+    virtual_router_id 51
+    priority {{ 150 if inventory_hostname == 'traefik-01' else (100 if inventory_hostname == 'traefik-02' else 50) }}
+    advert_int 1
+
+    authentication {
+        auth_type PASS
+        auth_pass ilab_secret
+    }
+
+    virtual_ipaddress {
+        10.10.10.15/24
+    }
+
+    # Unicast configuration (since we disabled multicast issues)
+    unicast_src_ip {{ ansible_host }}
+    unicast_peer {
+        {% for host in groups['traefik_nodes'] %}
+        {% if hostvars[host]['ansible_host'] != ansible_host %}
+        {{ hostvars[host]['ansible_host'] }}
+        {% endif %}
+        {% endfor %}
+    }
+}

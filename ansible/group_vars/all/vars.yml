@@ -12,7 +12,9 @@ timezone: "America/New_York"
 # NAS login
 nas_ip: "10.10.10.95"
 nas_user: "jthairu"
-nas_pass: "Mucii1311254*#"
+nas_pass: "{{ vault_nas_pass }}"
+
+media_db_pass: "{{ vault_media_db_pass }}"
 
 # mounts to NAS
 storage_mounts:
@@ -37,4 +39,11 @@ loki_url: "http://10.10.10.90:3100/loki/api/v1/push"
 postgres_host: "10.10.10.220" 
 
 # Media Database Config
-media_db_pass: "Mucii1311254"
+
+
+traefik_acme_email: "mwakilishi@gmail.com"
+
+aws_access_key: "{{ vault_aws_access_key }}"
+aws_secret_key: "{{ vault_aws_secret_key }}"
+
+traefik_dir: "/etc/traefik"

@@ -1,0 +1,21 @@
+vrrp_script check_traefik {
+    script "/usr/bin/docker ps -f name=traefik | grep -q 'Up'"
+    interval 2
+    weight -50 # Drop priority by 50 if Traefik is down
+}
+
+vrrp_instance VI_1 {
+    state {{ "MASTER" if inventory_hostname == 'traefik-01' else "BACKUP" }}
+    interface {{ ansible_default_ipv4.interface }}
+    virtual_router_id 51
+    priority {{ 255 if inventory_hostname == 'traefik-01' else (200 if inventory_hostname == 'traefik-02' else 100) }}
+    advert_int 1
+
+    virtual_ipaddress {
+        10.10.10.15/24
+    }
+
+    track_script {
+        check_traefik
+    }
+}

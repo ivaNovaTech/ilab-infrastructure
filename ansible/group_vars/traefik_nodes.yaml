@@ -1,0 +1,4 @@
+acme_master_node: "traefik-01"  # This is .16
+traefik_config_dir: "/etc/traefik"
+aws_access_key: "{{ vault_aws_access_key }}"
+aws_secret_key: "{{ vault_aws_secret_key }}"

@@ -1,0 +1,410 @@
+http:
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  serversTransports:
+    unifi-transport:
+      insecureSkipVerify: true
+    proxmox-transport:
+      insecureSkipVerify: true
+
+  routers:
+    http-catchall:
+      rule: "HostRegexp(`{host:.+}`)"
+      entryPoints:
+        - web
+      middlewares:
+        - https-redirect
+      service: noop@internal
+
+    traefik-dashboard:
+      rule: Host(`traefik.mwakilishi.com`)
+      entryPoints:
+        - websecure
+      service: api@internal
+      tls:
+        certResolver: route53_aws
+
+    pihole01:
+      rule: Host(`pihole01.mwakilishi.com`)
+      entryPoints:
+        - websecure
+      service: pihole01-service
+      tls:
+        certResolver: route53_aws
+
+    pihole02:
+      rule: Host(`pihole02.mwakilishi.com`)
+      entryPoints:
+        - websecure
+      service: pihole02-service
+      tls:
+        certResolver: route53_aws
+
+    pihole03:
+      rule: Host(`pihole03.mwakilishi.com`)
+      entryPoints:
+        - websecure
+      service: pihole03-service
+      tls:
+        certResolver: route53_aws
+
+    hass:
+      rule: "Host(`hass.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: hass-service
+      tls:
+        certResolver: route53_aws
+
+    zigbee:
+      rule: "Host(`zigbee.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: zigbee-service
+      tls:
+        certResolver: route53_aws
+
+    unifi:
+      rule: "Host(`unifi.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: unifi-service
+      tls:
+        certResolver: route53_aws
+
+    radarr:
+      rule: "Host(`radarr.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: radarr-service
+      tls:
+        certResolver: route53_aws
+
+    sonarr:
+      rule: "Host(`sonarr.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: sonarr-service
+      tls:
+        certResolver: route53_aws
+
+    lidarr:
+      rule: "Host(`lidarr.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: lidarr-service
+      tls:
+        certResolver: route53_aws
+
+    jackett:
+      rule: "Host(`jackett.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: jackett-service
+      tls:
+        certResolver: route53_aws
+
+    nzbget:
+      rule: "Host(`nzbget.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: nzbget-service
+      tls:
+        certResolver: route53_aws
+
+    plex:
+      rule: "Host(`plex.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: plex-service
+      tls:
+        certResolver: route53_aws
+
+    qbittorrent:
+      rule: "Host(`qbit.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: qbittorrent-service
+      tls:
+        certResolver: route53_aws
+
+    jellyfin:
+      rule: "Host(`jellyfin.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: jellyfin-service
+      tls:
+        certResolver: route53_aws
+
+    jfin:
+      rule: "Host(`jfin.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: jfin-service
+      tls:
+        certResolver: route53_aws
+
+    youtubedl:
+      rule: "Host(`youtubedl.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: youtubedl-service
+      tls:
+        certResolver: route53_aws
+
+    grafana:
+      rule: "Host(`grafana.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: grafana-service
+      tls:
+        certResolver: route53_aws
+
+    influxdb:
+      rule: "Host(`influxdb.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: influxdb-service
+      tls:
+        certResolver: route53_aws
+
+    loki:
+      rule: "Host(`loki.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: loki-service
+      tls:
+        certResolver: route53_aws
+
+    vault:
+      rule: "Host(`vault.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: vault-service
+      tls:
+        certResolver: route53_aws
+
+    nextcloud:
+      rule: "Host(`nextcloud.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: nextcloud-service
+      tls:
+        certResolver: route53_aws
+
+    ilab1:
+      rule: "Host(`ilab1.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: ilab1-service
+      tls:
+        certResolver: route53_aws
+
+    ilab2:
+      rule: "Host(`ilab2.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: ilab2-service
+      tls:
+        certResolver: route53_aws
+
+    ilab3:
+      rule: "Host(`ilab3.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: ilab3-service
+      tls:
+        certResolver: route53_aws
+
+    pmm:
+      rule: "Host(`pmm.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: pmm-service
+      tls:
+        certResolver: route53_aws
+
+    airflow:
+      rule: "Host(`airflow.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: airflow-service
+      tls:
+        certResolver: route53_aws
+
+    superset:
+      rule: "Host(`superset.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: superset-service
+      tls:
+        certResolver: route53_aws
+
+    pacs3:
+      rule: "Host(`pacs.mwakilishi.com`)"
+      entryPoints:
+        - websecure
+      service: pacs-service
+      tls:
+        certResolver: route53_aws
+
+  services:
+    pacs-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.99:80"
+
+    superset-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.246:8088"
+
+    airflow-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.208:8080"
+
+    pihole01-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.11/admin"  
+        passHostHeader: true
+
+    pihole02-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.12/admin"  
+        passHostHeader: true
+
+    pihole03-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.12/admin"  
+        passHostHeader: true
+
+    hass-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.80:8123"
+        passHostHeader: true
+
+    zigbee-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.75:8080"
+
+    unifi-service:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.10.1:443"
+        passHostHeader: true
+        serversTransport: unifi-transport
+
+    pmm-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.44:80"
+        passHostHeader: true
+
+    plex-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.60:32400"
+        passHostHeader: true
+
+    radarr-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.30:7878"
+        passHostHeader: false
+
+    sonarr-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.30:8989"
+        passHostHeader: false
+
+    lidarr-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.30:8686"
+
+    jackett-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.30:9117"
+
+    nzbget-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.30:6789"
+
+    qbittorrent-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.30:8080"
+
+    jellyfin-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.65:8096"
+    
+    jfin-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.65:8096"
+
+    youtubedl-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.30:8084"
+
+    grafana-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.90:3000"
+
+    influxdb-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.90:8086"
+
+    loki-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.90:3100"
+
+    vault-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.45:8080"
+
+    nextcloud-service:
+      loadBalancer:
+        servers:
+          - url: "http://10.10.10.40:8080"
+
+    ilab1-service:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.10.101:8006"
+        passHostHeader: true
+        serversTransport: proxmox-transport
+
+    ilab2-service:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.10.102:8006"
+        passHostHeader: true
+        serversTransport: proxmox-transport
+
+    ilab3-service:
+      loadBalancer:
+        servers:
+          - url: "https://10.10.10.103:8006"
+        passHostHeader: true
+        serversTransport: proxmox-transport

@@ -1,12 +1,19 @@
 # Terraform local state and plugins
-**/.terraform/
-**/*.tfstate
-**/*.tfstate.backup
-**/.terraform.lock.hcl
+# Ignore ALL terraform state files
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
 
-# Sensitive variable files (The Smoking Guns)
-**/*.tfvars
-**/*.tfvars.json
+# Ignore ALL variable files (where you store passwords)
+*.tfvars
+*.tfvars.json
+
+# Ignore the terraform binary folders
+.terraform/
+
+
+# Ignore the terraform binary folders
+.terraform/
 
 # Ansible
 **/ansible.log
@@ -14,3 +21,19 @@
 
 # System Files
 .DS_Store
+
+#inventory
+inventory.ini
+
+# --- WireGuard Keys ---
+# Never commit actual keys fetched or generated locally
+privatekey
+publickey
+client_*.conf
+*.key
+
+
+# --- General ---
+.env
+/tmp/acme.json
+/tmp/*.json

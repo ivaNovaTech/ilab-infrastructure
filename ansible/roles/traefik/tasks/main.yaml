@@ -1,0 +1,30 @@
+- name: Create Traefik directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "{{ traefik_dir }}"
+        - "{{ traefik_dir }}/dynamic"
+
+    - name: Ensure acme.json exists with correct permissions
+      file:
+        path: "{{ traefik_dir }}/acme.json"
+        state: touch
+        mode: '0600'  # CRITICAL for Traefik
+        owner: root
+        group: root
+
+    - name: Deploy Traefik configs
+      template:
+        src: "templates/{{ item }}.j2"
+        dest: "{{ traefik_dir }}/{{ item }}"
+      loop:
+        - traefik.yml
+        - dynamic_conf.yml
+        - docker-compose.yml
+
+    - name: Start Traefik containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ traefik_dir }}"
+        state: present
