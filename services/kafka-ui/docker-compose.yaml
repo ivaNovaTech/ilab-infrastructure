@@ -1,0 +1,12 @@
+services:
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8088:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=iLab-Cluster
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=10.10.10.235:9092,10.10.10.236:9092,10.10.10.237:9092
+      - KAFKA_CLUSTERS_0_METRICS_PORT=9092
+      - DYNAMIC_CONFIG_ENABLED=true
+    restart: always

@@ -28,7 +28,7 @@
 
     - name: Create Media directory
       file:
-        path: "{{ app_data_root }}"
+        path: "{{ media_stack_root }}"
         state: directory
         owner: "{{ admin_user }}"
         group: "{{ admin_group }}"
@@ -37,13 +37,13 @@
     - name: Copy Docker Compose configuration
       template:
         src: docker-compose.yaml.j2  # Uses templates/ directory by default
-        dest: "{{ app_data_root }}/docker-compose.yaml"
+        dest: "{{ media_stack_root }}/docker-compose.yaml"
         owner: "{{ admin_user }}"
         group: "{{ admin_group }}"
         mode: '0644'
 
     - name: Pull and Start Docker Stack
       community.docker.docker_compose_v2:
-        project_src: "{{ app_data_root }}"
+        project_src: "{{ media_stack_root }}"
         state: present
         pull: always

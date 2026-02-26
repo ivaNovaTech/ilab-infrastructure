@@ -39,7 +39,7 @@ services:
     ports:
       - 9117:9117
     volumes:
-      - "{{ app_data_root }}/jackett/config:/config"
+      - "{{ media_stack_root }}/jackett/config:/config"
     restart: unless-stopped
     networks:
       - docker_media_network
@@ -62,7 +62,7 @@ services:
     ports:
       - 8686:8686
     volumes:
-      - "{{ app_data_root }}/lidarr/config:/config"
+      - "{{ media_stack_root }}/lidarr/config:/config"
       - "{{ download_path }}:/downloads"
       - "{{ music_path }}:/music"
     restart: unless-stopped
@@ -87,7 +87,7 @@ services:
     ports:
       - 7878:7878
     volumes:
-      - "{{ app_data_root }}/radarr/config:/config"
+      - "{{ media_stack_root }}/radarr/config:/config"
       - "{{ download_path }}/Movies:/downloads/Movies"
       - "{{ video_path }}/Movies:/video/Movies"
     restart: unless-stopped
@@ -112,7 +112,7 @@ services:
     ports:
       - 8989:8989
     volumes:
-      - "{{ app_data_root }}/sonarr/config:/config"
+      - "{{ media_stack_root }}/sonarr/config:/config"
       - "{{ download_path }}/Series:/downloads/Series"
       - "{{ video_path }}/series:/video/Series"
     restart: unless-stopped
@@ -128,9 +128,9 @@ services:
       - PGID={{ admin_gid }}
       - TZ={{ timezone }}
     volumes:
-      - "{{ app_data_root }}/youtubedl/appdata:/app/appdata"
-      - "{{ app_data_root }}/youtubedl/subscriptions:/app/subscriptions"
-      - "{{ app_data_root }}/youtubedl/users:/app/users"
+      - "{{ media_stack_root }}/youtubedl/appdata:/app/appdata"
+      - "{{ media_stack_root }}/youtubedl/subscriptions:/app/subscriptions"
+      - "{{ media_stack_root }}/youtubedl/users:/app/users"
       - "{{ music_path }}:/app/audio"
       - "{{ video_path }}/Music:/app/video"
     ports:
@@ -150,7 +150,7 @@ services:
     ports:
       - "6789:6789/tcp"
     volumes:
-      - "{{ app_data_root }}/nzbget/config:/config"
+      - "{{ media_stack_root }}/nzbget/config:/config"
       - "{{ download_path }}:/downloads"
     restart: unless-stopped
     networks:

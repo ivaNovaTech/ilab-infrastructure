@@ -1,0 +1,47 @@
+scope: postgresql-cluster
+name: {{ inventory_hostname }}
+
+restapi:
+  listen: 0.0.0.0:8008
+  connect_address: {{ ansible_default_ipv4.address }}:8008
+
+etcd3:
+  hosts: {{ etcd_settings.endpoints | to_json }}
+  protocol: {{ etcd_settings.protocol }}
+
+bootstrap:
+  dcs:
+    postgresql:
+      use_pg_rewind: true
+      parameters:
+        password_encryption: scram-sha-256
+        shared_preload_libraries: pglogical
+        ssl: "off"
+        wal_level: logical
+        max_connections: 100
+        shared_buffers: "2GB"
+      pg_hba:
+{% for line in cluster_settings.postgresql.pg_hba %}
+        - {{ line }}
+{% endfor %}
+
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: {{ ansible_default_ipv4.address }}:5432
+  data_dir: /var/lib/postgresql/18/main
+  bin_dir: /usr/lib/postgresql/18/bin
+  pgpass: /tmp/pgpass
+
+postgresql:
+  listen: 0.0.0.0:5432
+  connect_address: {{ ansible_default_ipv4.address }}:5432
+  data_dir: /var/lib/postgresql/18/main
+  bin_dir: /usr/lib/postgresql/18/bin
+  pgpass: /tmp/pgpass
+  authentication:
+    replication:
+      username: replicator
+      password: {{ replication_password }}
+    superuser:
+      username: postgres
+      password: {{ postgres_password }}

@@ -1,0 +1,35 @@
+---
+- name: Deploy Kafka Service
+  hosts: kafka
+  become: true
+  vars:
+    kafka_dir: "/opt/kafka"
+    # The IP the VM uses to talk to clients
+    advertised_ip: "10.10.10.235" 
+
+  tasks:
+    - name: Ensure Docker is installed
+      ansible.builtin.apt:
+        name: [docker.io, docker-compose-v2]
+        state: present
+        update_cache: yes
+
+    - name: Create Kafka directory structure
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - "{{ kafka_dir }}"
+        - "{{ kafka_dir }}/zookeeper_data"
+        - "{{ kafka_dir }}/kafka_data"
+
+    - name: Deploy Docker Compose Template
+      ansible.builtin.template:
+        src: templates/docker-compose.yaml.j2
+        dest: "{{ kafka_dir }}/docker-compose.yaml"
+      notify: Restart Kafka
+
+  handlers:
+    - name: Restart Kafka
+      ansible.builtin.shell: "docker compose -f {{ kafka_dir }}/docker-compose.yaml up -d --force-recreate"

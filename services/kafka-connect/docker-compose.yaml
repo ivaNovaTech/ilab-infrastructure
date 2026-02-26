@@ -1,0 +1,49 @@
+services:
+  connect:
+    image: debezium/connect:2.7.3.Final
+    container_name: kafka-connect
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./plugins:/data/connect-plugins
+    environment:
+      - BOOTSTRAP_SERVERS=10.10.10.235:9092,10.10.10.236:9092,10.10.10.237:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=connect-configs
+      - OFFSET_STORAGE_TOPIC=connect-offsets
+      - STATUS_STORAGE_TOPIC=connect-status
+      # Matches your 3-node cluster for high availability
+      - CONFIG_STORAGE_REPLICATION_FACTOR=3
+      - OFFSET_STORAGE_REPLICATION_FACTOR=3
+      - STATUS_STORAGE_REPLICATION_FACTOR=3
+      - KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE=false
+      - CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE=false
+      # THE CRITICAL FIX: Added /kafka/connect so Debezium actually loads
+      - CONNECT_PLUGIN_PATH=/usr/share/java,/data/connect-plugins,/kafka/connect
+      # Performance tuning for high-volume logs
+      - CONNECT_PRODUCER_COMPRESSION_TYPE=lz4
+      - CONNECT_PRODUCER_ACKS=all
+    restart: always
+
+  cassandra:
+    image: cassandra:5.0.6
+    container_name: cassandra
+    restart: always
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=iLab_Archive
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=datacenter1
+      # Optional: Prevents Cassandra from eating all the RAM
+      - MAX_HEAP_SIZE=2G
+      - HEAP_NEWSIZE=800M
+    volumes:
+      - ./cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
+      interval: 15s
+      timeout: 10s
+      retries: 5

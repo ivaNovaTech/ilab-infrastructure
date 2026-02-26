@@ -21,29 +21,43 @@ storage_mounts:
   - { path: '/volume1/downloads', share: 'downloads' }
   - { path: '/volume1/music', share: 'music' }
   - { path: '/volume1/video', share: 'video' }
+ 
+
 
 # Base paths
-app_data_root: "/opt/media-stack"
 nas_root: "/volume1"
 
+plex_root: "/opt/plex"
+jellyfin_root: "/opt/jellyfin"
+media_stack_root: "/opt/media-stack"
+airflow_root: "/opt/airflow"
+
+home_dir: "/home/jthairu"
+
+#media, plex, jellyfin
 # Specific share paths (matching the storage_mounts)
 download_path: "{{ nas_root }}/downloads"
 music_path: "{{ nas_root }}/music"
 video_path: "{{ nas_root }}/video"
 
+postgres_host: 10.10.10.200
+
+
+
 # Logging
 loki_url: "http://10.10.10.90:3100/loki/api/v1/push"
 
-
-# for media apps - use VIP (connects to either haproxy-01 or haproxy-02)
-postgres_host: "10.10.10.220" 
-
-# Media Database Config
-
-
+#traefik
 traefik_acme_email: "mwakilishi@gmail.com"
-
+traefik_dir: "/etc/traefik"
 aws_access_key: "{{ vault_aws_access_key }}"
 aws_secret_key: "{{ vault_aws_secret_key }}"
+airflow_fernet_key : "{{ airflow_fernet_key }}"
 
-traefik_dir: "/etc/traefik"
+#mariadb
+pacsdb_password: "{{ pacsdb_password }}"
+vrrp_password: "{{ vrrp_password }}"
+vrrp_vip: "10.10.10.50"
+
+mariadb_root_password:  "{{ mariadb_root_password }}"
+

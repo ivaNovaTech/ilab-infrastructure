@@ -3,7 +3,7 @@ resource "proxmox_virtual_environment_vm" "plex" {
   node_name = "ilab-node-02"
   vm_id     = 102
   
-  # Set to q35 and ovmf as identified in your plan
+  # Set to q35 and ovmf as identified in plan
   machine       = "q35"
   bios          = "ovmf"
   scsi_hardware = "virtio-scsi-single"

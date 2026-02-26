@@ -1,0 +1,55 @@
+- name: Unified HAProxy and Keepalived Management
+  hosts: haproxy
+  become: yes
+  tasks:
+    - name: Allow non-local IP binding
+      sysctl: { name: net.ipv4.ip_nonlocal_bind, value: '1', state: present, reload: yes }
+
+    - name: Configure HAProxy
+      copy:
+        dest: /etc/haproxy/haproxy.cfg
+        content: |
+          global
+              stats socket /run/haproxy/admin.sock mode 660 level admin
+              user haproxy
+              group haproxy
+              daemon
+
+          defaults
+              mode tcp
+              timeout connect 5s
+              timeout client 1h
+              timeout server 1h
+
+          listen postgres
+              bind *:5432
+              option httpchk GET /primary
+              http-check expect status 200
+              default-server inter 3s fall 3 rise 2
+              server postgres-01 10.10.10.201:5432 check port 8008
+              server postgres-02 10.10.10.202:5432 check port 8008
+              server postgres-03 10.10.10.203:5432 check port 8008
+
+          listen stats
+              bind *:8080
+              mode http
+              stats enable
+              stats uri /
+    
+    - name: Restart HAProxy
+      systemd: { name: haproxy, state: restarted, enabled: yes }
+
+    - name: Configure Keepalived
+      copy:
+        dest: /etc/keepalived/keepalived.conf
+        content: |
+          vrrp_instance VI_1 {
+              state {{ 'MASTER' if inventory_hostname == 'haproxy-01' else 'BACKUP' }}
+              interface eth0
+              virtual_router_id 51
+              priority {{ 101 if inventory_hostname == 'haproxy-01' else 100 }}
+              virtual_ipaddress { {{ loadbalancer_vip }}/24 dev eth0 }
+          }
+
+    - name: Restart Keepalived
+      systemd: { name: keepalived, state: restarted, enabled: yes }

@@ -1,0 +1,54 @@
+---
+- name: Deploy Plex
+  hosts: plex
+  become: true
+
+  roles:
+    - nas_mounts  # Shared role for CIFS mounts
+
+  tasks:
+    - name: Ensure Python Docker SDK is installed
+      apt:
+        name: python3-docker
+        state: present
+        update_cache: yes
+
+    - name: Ensure Loki Docker driver is installed
+      community.docker.docker_plugin:
+        plugin_name: loki
+        alias: loki
+        state: enable
+        plugin_options:
+          allow-all-capabilities: "true"
+
+    - name: Ensure Traefik network exists
+      community.docker.docker_network:
+        name: traefik_proxy
+        state: present
+
+    - name: Create Plex and Beats directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ admin_user }}"
+        group: "{{ admin_group }}"
+        mode: '0755'
+      loop:
+        - "{{ plex_root }}"
+
+    - name: Copy Docker Compose and Beats configurations
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ plex_root }}/{{ item.dest }}"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_group }}"
+        mode: '0644'
+      loop:
+        - { src: 'docker-compose.yaml.j2', dest: 'docker-compose.yaml' }
+
+    
+    - name: Pull and Start Docker Stack
+      community.docker.docker_compose_v2:
+        project_src: "{{ plex_root }}"
+        state: present
+        pull: always

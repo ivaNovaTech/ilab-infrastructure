@@ -1,0 +1,29 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    logging:
+      driver: loki
+      options:
+        loki-url: "{{ loki_url }}"
+        loki-retries: 2
+        loki-max-backoff: 800ms
+        loki-timeout: 1s
+        keep-file: "true"
+        mode: "non-blocking"
+    container_name: jellyfin
+    network_mode: host
+    environment:
+      - PUID={{ admin_uid }}
+      - PGID={{ admin_gid }}
+      - TZ={{ timezone }}
+    volumes:
+      - {{ jellyfin_root }}/jellyfin/config:/config
+      - {{ jellyfin_root }}/cache:/cache
+      - {{ download_path }}:/downloads
+      - {{ music_path }}:/music
+      - {{ video_path }}:/video
+      - {{ jellyfin_root }}/iptv:/mnt/iptv:ro
+      - {{ jellyfin_root }}/m3u:/mnt/m3u:ro
+    devices:
+      - /dev/dri:/dev/dri  # GPU passthrough
+    restart: unless-stopped
